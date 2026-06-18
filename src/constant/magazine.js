@@ -23,7 +23,7 @@ const MAGAZINES = [
   },
   {
     magazine: "Food & Beverage Technology",
-    regions: ["US", "CANADA", "LATIN", "EUROPE", "APAC"],
+    regions: ["US","CANADA", "EUROPE"],
   },
   {
     magazine: "Food Business",
@@ -73,7 +73,7 @@ const MAGAZINES = [
     magazine: "Agriculture",
     regions: ["US", "CANADA", "LATIN"],
     projects: [
-      "Agi Bio Spcecial",
+      "Agi Bio Special",
     ]
   },
   {
@@ -95,6 +95,9 @@ const MAGAZINES = [
   {
     magazine: "CIOReview",
     regions: ["US", "CANADA", "LATIN", "EUROPE", "APAC"],
+    projects: [
+      "Partner",
+    ]
   },
   {
     magazine: "Banking CIO",
