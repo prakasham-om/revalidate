@@ -20,9 +20,6 @@ const hasStates = (countryName) => {
   return countryToStateKey[countryName] !== undefined;
 };
 
-// Regions to exclude from magazine display
-const EXCLUDED_REGIONS = ["LATIN", "CANADA", "USA"];
-
 const RevalidateForm = ({ onClose }) => {
   const [formData, setFormData] = useState({
     type: "normal",
@@ -38,6 +35,7 @@ const RevalidateForm = ({ onClose }) => {
 
   const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false);
   const [countrySearch, setCountrySearch] = useState("");
+  const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const countryDropdownRef = useRef(null);
 
   // Memoized country list
@@ -85,12 +83,14 @@ const RevalidateForm = ({ onClose }) => {
     
     setCountrySearch(country);
     setIsCountryDropdownOpen(false);
+    setHighlightedIndex(-1);
   }, []);
 
   const handleCountryInputChange = useCallback((e) => {
     const value = e.target.value;
     setCountrySearch(value);
     setIsCountryDropdownOpen(true);
+    setHighlightedIndex(-1);
     
     if (value === "") {
       setFormData(prev => ({
@@ -104,11 +104,66 @@ const RevalidateForm = ({ onClose }) => {
     }
   }, []);
 
+  // Handle keyboard navigation
+  const handleKeyDown = useCallback((e) => {
+    if (!isCountryDropdownOpen || filteredCountries.length === 0) return;
+
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault();
+        setHighlightedIndex(prev => 
+          prev < filteredCountries.length - 1 ? prev + 1 : 0
+        );
+        break;
+      
+      case 'ArrowUp':
+        e.preventDefault();
+        setHighlightedIndex(prev => 
+          prev > 0 ? prev - 1 : filteredCountries.length - 1
+        );
+        break;
+      
+      case 'Enter':
+        e.preventDefault();
+        if (highlightedIndex >= 0 && highlightedIndex < filteredCountries.length) {
+          handleCountrySelect(filteredCountries[highlightedIndex]);
+        } else if (filteredCountries.length === 1) {
+          // Auto-select if only one result
+          handleCountrySelect(filteredCountries[0]);
+        }
+        break;
+      
+      case 'Escape':
+        e.preventDefault();
+        setIsCountryDropdownOpen(false);
+        setHighlightedIndex(-1);
+        break;
+      
+      default:
+        break;
+    }
+  }, [isCountryDropdownOpen, filteredCountries, highlightedIndex, handleCountrySelect]);
+
+  // Auto-select when there's only one match and user types
+  useEffect(() => {
+    if (filteredCountries.length === 1 && countrySearch && isCountryDropdownOpen) {
+      // Auto-select after a small delay to allow typing
+      const timer = setTimeout(() => {
+        if (filteredCountries.length === 1) {
+          handleCountrySelect(filteredCountries[0]);
+        }
+      }, 500); // 500ms delay
+
+      return () => clearTimeout(timer);
+    }
+  }, [filteredCountries, countrySearch, isCountryDropdownOpen, handleCountrySelect]);
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (countryDropdownRef.current && !countryDropdownRef.current.contains(event.target)) {
         setIsCountryDropdownOpen(false);
         if (!formData.country) setCountrySearch("");
+        setHighlightedIndex(-1);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -129,17 +184,21 @@ const RevalidateForm = ({ onClose }) => {
     ).values()];
   }, [formData.region]);
 
-  // Get magazines with region display (excluding certain regions)
+  // Get magazines with region display (exclude region for CANADA, LATIN, USA)
   const magazineOptions = useMemo(() => {
     if (!formData.region) return [];
     
+    const EXCLUDED_REGIONS = ["LATIN", "CANADA", "USA"];
+    
     return magazines
       .filter(item => item.region === formData.region.toUpperCase())
-      .filter(item => !EXCLUDED_REGIONS.includes(item.region?.toUpperCase()))
-      .map(item => ({
-        value: item.magazine,
-        label: `${item.magazine} ${item.region}`
-      }));
+      .map(item => {
+        const isExcluded = EXCLUDED_REGIONS.includes(item.region?.toUpperCase());
+        return {
+          value: item.magazine,
+          label: isExcluded ? item.magazine : `${item.magazine} ${item.region}`
+        };
+      });
   }, [formData.region]);
 
   const availableProjects = useMemo(() => {
@@ -261,6 +320,7 @@ const RevalidateForm = ({ onClose }) => {
                   value={countrySearch}
                   onChange={handleCountryInputChange}
                   onFocus={() => setIsCountryDropdownOpen(true)}
+                  onKeyDown={handleKeyDown}
                   placeholder="Search country..."
                   className="w-full h-11 border border-gray-300 rounded-md px-3 pr-10 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-colors hover:border-gray-400"
                 />
@@ -279,12 +339,17 @@ const RevalidateForm = ({ onClose }) => {
               {isCountryDropdownOpen && (
                 <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
                   {filteredCountries.length > 0 ? (
-                    filteredCountries.map(country => (
+                    filteredCountries.map((country, index) => (
                       <button
                         key={country}
                         type="button"
                         onClick={() => handleCountrySelect(country)}
-                        className="w-full text-left px-4 py-2 hover:bg-indigo-50 text-sm transition-colors duration-150 flex items-center gap-2"
+                        onMouseEnter={() => setHighlightedIndex(index)}
+                        className={`w-full text-left px-4 py-2 text-sm transition-colors duration-150 flex items-center gap-2 ${
+                          highlightedIndex === index 
+                            ? 'bg-indigo-100 text-indigo-700' 
+                            : 'hover:bg-indigo-50'
+                        }`}
                       >
                         {formData.country === country && (
                           <svg className="w-4 h-4 text-indigo-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
