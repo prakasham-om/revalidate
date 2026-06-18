@@ -25,7 +25,6 @@ export const countryToDomain = {
   "Nicaragua": "latin",
   "Dominican Republic": "latin",
   "Cuba": "latin",
-  "Jamaica": "latin",
 
   // Europe
   "United Kingdom": "europe",
@@ -56,18 +55,14 @@ export const countryToDomain = {
   "Latvia": "europe",
   "Lithuania": "europe",
   "Greece": "europe",
-  "Cyprus": "europe",
   "Malta": "europe",
   "Iceland": "europe",
-  "Ukraine": "europe",
-  "Serbia": "europe",
   "Bosnia and Herzegovina": "europe",
   "Montenegro": "europe",
   "North Macedonia": "europe",
   "Albania": "europe",
 
   // APAC
-  "India": "apac",
   "China": "apac",
   "Japan": "apac",
   "South Korea": "apac",
@@ -78,16 +73,7 @@ export const countryToDomain = {
   "Vietnam": "apac",
   "Philippines": "apac",
   "Australia": "apac",
-  "New Zealand": "apac",
   "Hong Kong": "apac",
   "Taiwan": "apac",
-  "Bangladesh": "apac",
-  "Sri Lanka": "apac",
-  "Pakistan": "apac",
-  "Nepal": "apac",
-  "Myanmar": "apac",
-  "Cambodia": "apac",
-  "Laos": "apac",
-  "Brunei": "apac",
-  "Mongolia": "apac"
+  
 };
