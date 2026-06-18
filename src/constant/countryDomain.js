@@ -27,7 +27,7 @@ export const countryToDomain = {
   "Cuba": "latin",
 
   // Europe
-  "United Kingdom": "europe",
+  "United Kingdom(uk)": "europe",
   "Germany": "europe",
   "France": "europe",
   "Italy": "europe",
